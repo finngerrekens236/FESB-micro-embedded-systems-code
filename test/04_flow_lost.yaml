@@ -1,0 +1,16 @@
+name: Flow lost during fluid phase -> ERROR
+version: 1
+steps:
+  - wait-serial: 'STATE: IDLE'
+  - set-control: { part-id: btn_start, control: pressed, value: 1 }
+  - delay: 100ms
+  - set-control: { part-id: btn_start, control: pressed, value: 0 }
+  - wait-serial: 'STATE: FLUID_1'
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'Flow detected'
+  - delay: 2s
+  - set-control: { part-id: btn_flow, control: pressed, value: 0 }
+  - wait-serial: 'ERROR: flow lost during fluid phase'
+  - wait-serial: 'STATE: ERROR'
+  - expect-pin: { part-id: esp, name: '33', value: 0 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }

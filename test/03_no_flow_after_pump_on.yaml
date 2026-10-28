@@ -1,0 +1,22 @@
+name: No flow after pump ON -> ERROR, RESET -> IDLE
+version: 1
+steps:
+  - wait-serial: 'STATE: IDLE'
+  - set-control: { part-id: btn_start, control: pressed, value: 1 }
+  - delay: 100ms
+  - set-control: { part-id: btn_start, control: pressed, value: 0 }
+  - wait-serial: 'STATE: FLUID_1'
+  - wait-serial: 'ERROR: no flow after pump ON'
+  - wait-serial: 'STATE: ERROR'
+  - expect-pin: { part-id: esp, name: '33', value: 0 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  # START is ignored in ERROR
+  - set-control: { part-id: btn_start, control: pressed, value: 1 }
+  - delay: 100ms
+  - set-control: { part-id: btn_start, control: pressed, value: 0 }
+  - delay: 500ms
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  - set-control: { part-id: btn_reset, control: pressed, value: 1 }
+  - wait-serial: 'RESET received'
+  - set-control: { part-id: btn_reset, control: pressed, value: 0 }
+  - wait-serial: 'STATE: IDLE'

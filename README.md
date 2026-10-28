@@ -22,6 +22,18 @@ Milestone 1 (control simulation) is done.
 
 ERROR and RESET use GPIO 23/4 instead of 21/22, so the default I2C pins stay free for displays/sensors in later stages.
 
+## Automated tests (Wokwi CLI)
+
+`test/*.yaml` are Wokwi automation scenarios covering the Milestone 1 and 2 test procedures (full cycle, STOP, reset, flow faults, digital error).
+They use `test/diagram.json`: same circuit, but FLOW is a push button, because automation cannot drive a slide switch.
+
+```bash
+pio run                                   # build firmware first
+WOKWI_CLI_TOKEN=<token> bash test/run_tests.sh
+```
+
+Token: https://wokwi.com/dashboard/ci. Never commit it.
+
 ## Deliberate deviations from the assignment
 
 - **Flow-supervised changeover** (extends §5.4 with the FLOW input from §6):

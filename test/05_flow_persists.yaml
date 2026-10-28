@@ -1,0 +1,15 @@
+name: Flow persists after pump OFF -> ERROR
+version: 1
+steps:
+  - wait-serial: 'STATE: IDLE'
+  - set-control: { part-id: btn_start, control: pressed, value: 1 }
+  - delay: 100ms
+  - set-control: { part-id: btn_start, control: pressed, value: 0 }
+  - wait-serial: 'STATE: FLUID_1'
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'STATE: CHANGE_1_TO_2'
+  - wait-serial: 'ERROR: flow persists after pump OFF'
+  - wait-serial: 'STATE: ERROR'
+  - expect-pin: { part-id: esp, name: '33', value: 0 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  - expect-pin: { part-id: esp, name: '26', value: 0 }

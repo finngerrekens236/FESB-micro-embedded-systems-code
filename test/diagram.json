@@ -1,0 +1,345 @@
+{
+  "version": 1,
+  "author": "Finn Gerrekens",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_pump",
+      "top": 14.35,
+      "left": -98.8,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_v1",
+      "top": 74.35,
+      "left": -98.8,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_v2",
+      "top": 134.35,
+      "left": -98.8,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r_v3",
+      "top": 194.35,
+      "left": -98.8,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_pump",
+      "top": -22,
+      "left": -140,
+      "attrs": {
+        "color": "blue",
+        "label": "PUMP"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_v1",
+      "top": 38,
+      "left": -140,
+      "attrs": {
+        "color": "red",
+        "label": "V1"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_v2",
+      "top": 98,
+      "left": -140,
+      "attrs": {
+        "color": "yellow",
+        "label": "V2"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "led_v3",
+      "top": 158,
+      "left": -140,
+      "attrs": {
+        "color": "green",
+        "label": "V3"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_error",
+      "top": -33,
+      "left": 200,
+      "attrs": {
+        "color": "yellow",
+        "label": "DIGITAL ERROR"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_stop",
+      "top": 57,
+      "left": 200,
+      "attrs": {
+        "color": "red",
+        "label": "STOP"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_start",
+      "top": 117,
+      "left": 200,
+      "attrs": {
+        "color": "green",
+        "label": "START"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_reset",
+      "top": 177,
+      "left": 200,
+      "attrs": {
+        "color": "blue",
+        "label": "RESET"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn_flow",
+      "top": 240,
+      "left": 20,
+      "attrs": {
+        "color": "white",
+        "label": "FLOW",
+        "bounce": "0"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "esp:33",
+      "r_pump:2",
+      "blue",
+      [
+        "h-15.4",
+        "v-76"
+      ]
+    ],
+    [
+      "esp:25",
+      "r_v1:2",
+      "red",
+      [
+        "h-30",
+        "v-25.6"
+      ]
+    ],
+    [
+      "esp:26",
+      "r_v2:2",
+      "gold",
+      [
+        "h-30",
+        "v24.8"
+      ]
+    ],
+    [
+      "esp:27",
+      "r_v3:2",
+      "green",
+      [
+        "h-15.4",
+        "v75.2"
+      ]
+    ],
+    [
+      "r_pump:1",
+      "led_pump:A",
+      "blue",
+      []
+    ],
+    [
+      "r_v1:1",
+      "led_v1:A",
+      "red",
+      []
+    ],
+    [
+      "r_v2:1",
+      "led_v2:A",
+      "gold",
+      []
+    ],
+    [
+      "r_v3:1",
+      "led_v3:A",
+      "green",
+      []
+    ],
+    [
+      "led_pump:C",
+      "led_v1:C",
+      "black",
+      [
+        "h-20",
+        "v60",
+        "h20"
+      ]
+    ],
+    [
+      "led_v1:C",
+      "led_v2:C",
+      "black",
+      [
+        "h-20",
+        "v60",
+        "h20"
+      ]
+    ],
+    [
+      "led_v2:C",
+      "led_v3:C",
+      "black",
+      [
+        "h-20",
+        "v60",
+        "h20"
+      ]
+    ],
+    [
+      "led_v3:C",
+      "esp:GND.1",
+      "black",
+      [
+        "v24",
+        "h120",
+        "v-70.4"
+      ]
+    ],
+    [
+      "esp:23",
+      "btn_error:1.l",
+      "orange",
+      [
+        "h19.6",
+        "v-58.4"
+      ]
+    ],
+    [
+      "esp:19",
+      "btn_stop:1.l",
+      "red",
+      [
+        "h34.4",
+        "v-26"
+      ]
+    ],
+    [
+      "esp:18",
+      "btn_start:1.l",
+      "green",
+      [
+        "h34.4",
+        "v24.4"
+      ]
+    ],
+    [
+      "esp:4",
+      "btn_reset:1.l",
+      "violet",
+      [
+        "h19.6",
+        "v46"
+      ]
+    ],
+    [
+      "btn_error:2.r",
+      "esp:GND.2",
+      "black",
+      [
+        "h19.2",
+        "v-44",
+        "h-176",
+        "v73.8"
+      ]
+    ],
+    [
+      "btn_error:2.r",
+      "btn_stop:2.r",
+      "black",
+      [
+        "h19.2",
+        "v90",
+        "h-19.2"
+      ]
+    ],
+    [
+      "btn_stop:2.r",
+      "btn_start:2.r",
+      "black",
+      [
+        "h19.2",
+        "v60",
+        "h-19.2"
+      ]
+    ],
+    [
+      "btn_start:2.r",
+      "btn_reset:2.r",
+      "black",
+      [
+        "h19.2",
+        "v60",
+        "h-19.2"
+      ]
+    ],
+    [
+      "esp:13",
+      "btn_flow:1.l",
+      "cyan",
+      []
+    ],
+    [
+      "btn_flow:2.l",
+      "esp:GND.1",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {}
+}

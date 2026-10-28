@@ -246,7 +246,7 @@ void runningState() {
 }
 
 void stateMachine() {
-  bool start = startPressed();  // read every loop to keep edge detection correct
+  bool start = startPressed();  // read every loop to keep edge detection correct and not get triggerd by a signal thats stuck low for a long time
   updateFlow();
 
   // Faults latch into ERROR until RESET is pressed

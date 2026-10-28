@@ -1,0 +1,14 @@
+name: Flow in IDLE -> ERROR, RESET once flow is gone
+version: 1
+steps:
+  - wait-serial: 'STATE: IDLE'
+  - delay: 3500ms
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'ERROR: flow detected while idle'
+  - wait-serial: 'STATE: ERROR'
+  - set-control: { part-id: btn_flow, control: pressed, value: 0 }
+  - delay: 200ms
+  - set-control: { part-id: btn_reset, control: pressed, value: 1 }
+  - wait-serial: 'RESET received'
+  - set-control: { part-id: btn_reset, control: pressed, value: 0 }
+  - wait-serial: 'STATE: IDLE'

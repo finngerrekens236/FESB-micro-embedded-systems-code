@@ -1,0 +1,49 @@
+name: Full cycle with flow (M1 normal cycle + M2 flow supervision)
+version: 1
+steps:
+  - wait-serial: 'STATE: IDLE'
+  # Power-up: all outputs OFF
+  - expect-pin: { part-id: esp, name: '33', value: 0 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  - expect-pin: { part-id: esp, name: '26', value: 0 }
+  - expect-pin: { part-id: esp, name: '27', value: 0 }
+
+  - set-control: { part-id: btn_start, control: pressed, value: 1 }
+  - delay: 100ms
+  - set-control: { part-id: btn_start, control: pressed, value: 0 }
+  - wait-serial: 'STATE: FLUID_1'
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'Flow detected'
+  - expect-pin: { part-id: esp, name: '33', value: 1 }
+  - expect-pin: { part-id: esp, name: '25', value: 1 }
+  - expect-pin: { part-id: esp, name: '26', value: 0 }
+  - expect-pin: { part-id: esp, name: '27', value: 0 }
+
+  - wait-serial: 'STATE: CHANGE_1_TO_2'
+  - set-control: { part-id: btn_flow, control: pressed, value: 0 }
+  - wait-serial: 'Flow stopped'
+  - wait-serial: 'STATE: FLUID_2'
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'Flow detected'
+  - expect-pin: { part-id: esp, name: '33', value: 1 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  - expect-pin: { part-id: esp, name: '26', value: 1 }
+  - expect-pin: { part-id: esp, name: '27', value: 0 }
+
+  - wait-serial: 'STATE: CHANGE_2_TO_3'
+  - set-control: { part-id: btn_flow, control: pressed, value: 0 }
+  - wait-serial: 'Flow stopped'
+  - wait-serial: 'STATE: FLUID_3'
+  - set-control: { part-id: btn_flow, control: pressed, value: 1 }
+  - wait-serial: 'Flow detected'
+  - expect-pin: { part-id: esp, name: '33', value: 1 }
+  - expect-pin: { part-id: esp, name: '25', value: 0 }
+  - expect-pin: { part-id: esp, name: '26', value: 0 }
+  - expect-pin: { part-id: esp, name: '27', value: 1 }
+
+  - wait-serial: 'STATE: COMPLETE'
+  - set-control: { part-id: btn_flow, control: pressed, value: 0 }
+  - wait-serial: 'All outputs OFF'
+  - wait-serial: 'STATE: IDLE'
+  - expect-pin: { part-id: esp, name: '33', value: 0 }
+  - expect-pin: { part-id: esp, name: '27', value: 0 }
