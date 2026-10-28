@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "author": "Finn Gerrekens",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+
+    { "type": "wokwi-resistor", "id": "r1", "top": 0, "left": 200, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": 40, "left": 200, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r3", "top": 80, "left": 200, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r4", "top": 120, "left": 200, "attrs": { "value": "220" } },
+
+    { "type": "wokwi-led", "id": "led_v1", "top": -40, "left": 300, "attrs": { "color": "red", "label": "V1" } },
+    { "type": "wokwi-led", "id": "led_v2", "top": 0, "left": 300, "attrs": { "color": "yellow", "label": "V2" } },
+    { "type": "wokwi-led", "id": "led_v3", "top": 40, "left": 300, "attrs": { "color": "green", "label": "V3" } },
+    { "type": "wokwi-led", "id": "led_pump", "top": 80, "left": 300, "attrs": { "color": "blue", "label": "PUMP" } },
+
+    { "type": "wokwi-pushbutton", "id": "btn_start", "top": 220, "left": 160, "attrs": { "color": "green", "label": "START" } },
+    { "type": "wokwi-pushbutton", "id": "btn_stop", "top": 290, "left": 160, "attrs": { "color": "red", "label": "STOP" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+
+    [ "esp:25", "r1:1", "red", [] ],
+    [ "r1:2", "led_v1:A", "red", [] ],
+    [ "led_v1:C", "esp:GND.1", "black", [] ],
+
+    [ "esp:26", "r2:1", "yellow", [] ],
+    [ "r2:2", "led_v2:A", "yellow", [] ],
+    [ "led_v2:C", "esp:GND.1", "black", [] ],
+
+    [ "esp:27", "r3:1", "green", [] ],
+    [ "r3:2", "led_v3:A", "green", [] ],
+    [ "led_v3:C", "esp:GND.1", "black", [] ],
+
+    [ "esp:33", "r4:1", "blue", [] ],
+    [ "r4:2", "led_pump:A", "blue", [] ],
+    [ "led_pump:C", "esp:GND.1", "black", [] ],
+
+    [ "esp:18", "btn_start:1.l", "green", [] ],
+    [ "btn_start:2.l", "esp:GND.2", "black", [] ],
+
+    [ "esp:19", "btn_stop:1.l", "red", [] ],
+    [ "btn_stop:2.l", "esp:GND.2", "black", [] ]
+  ],
+  "dependencies": {}
+}
