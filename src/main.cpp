@@ -250,6 +250,12 @@ void stateMachine() {
 
   switch (state) {
     case IDLE:
+      // Pump is OFF, so flow means a leak or sensor fault.
+      // Grace period after STOP, so the flow can run down first.
+      if (flowDetected()) {
+        if (waitDone(FLOW_STOP_TIMEOUT)) raiseError("flow detected while idle");
+        break;  // no START while there is still flow
+      }
       if (start && digitalRead(PIN_STOP) == HIGH) {  // ignore START while STOP is held
         Serial.println("START received");
         enterState(RUNNING);
@@ -262,7 +268,8 @@ void stateMachine() {
       break;
 
     case ERROR_STATE:
-      if (digitalRead(PIN_RESET) == LOW && digitalRead(PIN_DIGITALERROR) == HIGH) {
+      if (digitalRead(PIN_RESET) == LOW && digitalRead(PIN_DIGITALERROR) == HIGH &&
+          !flowDetected()) {
         Serial.println("RESET received");
         errorFlag = false;
         enterState(IDLE);
