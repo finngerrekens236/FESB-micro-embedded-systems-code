@@ -20,6 +20,7 @@ constexpr unsigned long SWITCH_DELAY = 3000;  /// valve wait in a changeover
 // Flow supervision (docs/ASSIGNMENT.md 6)
 constexpr unsigned long FLOW_START_TIMEOUT = 3000;  /// max wait for flow after pump ON
 constexpr unsigned long FLOW_STOP_TIMEOUT  = 3000;  /// max wait for flow to stop after pump OFF
+constexpr unsigned long FLOW_DEBOUNCE      = 50;    /// FLOW must be stable this long to count
 
 enum State {
   IDLE,
@@ -45,6 +46,9 @@ int step = 0;                 /// sub-step inside the current phase (used by cha
 unsigned long startTime = 0;  /// millis() when the current state, phase or step began
 bool errorFlag = false;       /// set when an unsafe condition is detected
 bool lastStartLevel = HIGH;   /// previous START level, for edge detection
+bool flowStable = false;      /// debounced FLOW state
+bool flowRaw = false;         /// last raw FLOW reading
+unsigned long flowChangeTime = 0; /// millis() of the last raw FLOW change
 
 const char* stateName(State s) {
   switch (s) {
@@ -127,8 +131,19 @@ bool startPressed() {
   return pressed;
 }
 
+// Debounce FLOW: accept a new level only after it is stable for FLOW_DEBOUNCE
+void updateFlow() {
+  bool raw = digitalRead(PIN_FLOW) == LOW;
+  if (raw != flowRaw) {
+    flowRaw = raw;
+    flowChangeTime = millis();
+  } else if (raw != flowStable && millis() - flowChangeTime >= FLOW_DEBOUNCE) {
+    flowStable = raw;
+  }
+}
+
 bool flowDetected() {
-  return digitalRead(PIN_FLOW) == LOW;
+  return flowStable;
 }
 
 // Latches a fault; stateMachine() switches everything OFF and enters ERROR
@@ -228,6 +243,7 @@ void runningState() {
 
 void stateMachine() {
   bool start = startPressed();  // read every loop to keep edge detection correct
+  updateFlow();
 
   // Faults latch into ERROR until RESET is pressed
   if (digitalRead(PIN_DIGITALERROR) == LOW && state != ERROR_STATE) {
