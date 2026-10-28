@@ -34,6 +34,8 @@ WOKWI_CLI_TOKEN=<token> bash test/run_tests.sh
 
 Token: https://wokwi.com/dashboard/ci. Never commit it.
 
+Latest results: [`test/RESULTS.md`](test/RESULTS.md) (regenerated on every run).
+
 ## Deliberate deviations from the assignment
 
 - **Flow-supervised changeover** (extends §5.4 with the FLOW input from §6):
