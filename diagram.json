@@ -16,6 +16,7 @@
     { "type": "wokwi-led", "id": "led_v3", "top": 158, "left": -140, "attrs": { "color": "green", "label": "V3" } },
 
     { "type": "wokwi-slide-switch", "id": "sw_flow", "top": 240, "left": 20, "attrs": {} },
+    { "type": "wokwi-text", "id": "txt_flow", "top": 244, "left": 60, "attrs": { "text": "FLOW SENSOR\n← left: NO FLOW\nright: FLOW →" } },
 
     { "type": "wokwi-pushbutton", "id": "btn_error", "top": -33, "left": 200, "attrs": { "color": "yellow", "label": "DIGITAL ERROR" } },
     { "type": "wokwi-pushbutton", "id": "btn_stop", "top": 57, "left": 200, "attrs": { "color": "red", "label": "STOP" } },
