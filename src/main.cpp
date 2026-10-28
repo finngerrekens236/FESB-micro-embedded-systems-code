@@ -18,34 +18,45 @@ constexpr unsigned long VALVE_SWITCH_DELAY = 500;
 
 enum State {
   IDLE,
+  RUNNING,
+  ERROR_STATE
+};
+
+// Steps of the wash sequence inside RUNNING
+enum Phase {
   PREPARE_FLUID_1,
   FLUID_1,
   CHANGE_1_TO_2,
   FLUID_2,
   CHANGE_2_TO_3,
-  FLUID_3,
-  COMPLETE,
-  ERROR_STATE
+  FLUID_3
 };
 
 // Global variables
 State state = IDLE;
-int step = 0;                 /// sub-step inside the current state (used by changeovers)
-unsigned long startTime = 0;  /// millis() when the current state or step began
+Phase phase = PREPARE_FLUID_1; /// current step of the sequence, only used in RUNNING
+int step = 0;                 /// sub-step inside the current phase (used by changeovers)
+unsigned long startTime = 0;  /// millis() when the current state, phase or step began
 bool errorFlag = false;       /// set when an unsafe condition is detected
 bool lastStartLevel = HIGH;   /// previous START level, for edge detection
 
 const char* stateName(State s) {
   switch (s) {
-    case IDLE:            return "IDLE";
+    case IDLE:        return "IDLE";
+    case RUNNING:     return "RUNNING";
+    case ERROR_STATE: return "ERROR";
+  }
+  return "?";
+}
+
+const char* phaseName(Phase p) {
+  switch (p) {
     case PREPARE_FLUID_1: return "PREPARE_FLUID_1";
     case FLUID_1:         return "FLUID_1";
     case CHANGE_1_TO_2:   return "CHANGE_1_TO_2";
     case FLUID_2:         return "FLUID_2";
     case CHANGE_2_TO_3:   return "CHANGE_2_TO_3";
     case FLUID_3:         return "FLUID_3";
-    case COMPLETE:        return "COMPLETE";
-    case ERROR_STATE:     return "ERROR";
   }
   return "?";
 }
@@ -83,6 +94,14 @@ void enterState(State s) {
   Serial.println(stateName(s));
 }
 
+void enterPhase(Phase p) {
+  phase = p;
+  step = 0;
+  startTime = millis();
+  Serial.print("PHASE: ");
+  Serial.println(phaseName(p));
+}
+
 void nextStep() {
   step++;
   startTime = millis();  // restart the timer once, on step change
@@ -101,7 +120,7 @@ bool startPressed() {
 }
 
 // Pump OFF + close valve -> wait -> open next valve -> wait -> pump ON
-void changeover(int fluid, State next) {
+void changeover(int fluid, Phase next) {
   bool v1 = (fluid == 1), v2 = (fluid == 2), v3 = (fluid == 3);
 
   if (step == 0) {
@@ -112,7 +131,39 @@ void changeover(int fluid, State next) {
     nextStep();
   } else if (step == 2 && waitDone(VALVE_SWITCH_DELAY)) {
     setOutputs(true, v1, v2, v3);
-    enterState(next);
+    enterPhase(next);
+  }
+}
+
+void runningState() {
+  switch (phase) {
+    case PREPARE_FLUID_1:
+      changeover(1, FLUID_1);
+      break;
+
+    case FLUID_1:
+      if (waitDone(T_FLUID_1)) enterPhase(CHANGE_1_TO_2);
+      break;
+
+    case CHANGE_1_TO_2:
+      changeover(2, FLUID_2);
+      break;
+
+    case FLUID_2:
+      if (waitDone(T_FLUID_2)) enterPhase(CHANGE_2_TO_3);
+      break;
+
+    case CHANGE_2_TO_3:
+      changeover(3, FLUID_3);
+      break;
+
+    case FLUID_3:
+      if (waitDone(T_FLUID_3)) {  // run complete
+        allOutputsOff();
+        Serial.println("All outputs OFF");
+        enterState(IDLE);
+      }
+      break;
   }
 }
 
@@ -130,8 +181,8 @@ void stateMachine() {
     return;
   }
 
-  // STOP has priority over every running state
-  if (digitalRead(PIN_STOP) == LOW && state != IDLE && state != ERROR_STATE) {
+  // STOP has priority while running
+  if (digitalRead(PIN_STOP) == LOW && state == RUNNING) {
     Serial.println("STOP received");
     allOutputsOff();
     enterState(IDLE);
@@ -142,38 +193,13 @@ void stateMachine() {
     case IDLE:
       if (start) {
         Serial.println("START received");
-        enterState(PREPARE_FLUID_1);
+        enterState(RUNNING);
+        enterPhase(PREPARE_FLUID_1);
       }
       break;
 
-    case PREPARE_FLUID_1:
-      changeover(1, FLUID_1);
-      break;
-
-    case FLUID_1:
-      if (waitDone(T_FLUID_1)) enterState(CHANGE_1_TO_2);
-      break;
-
-    case CHANGE_1_TO_2:
-      changeover(2, FLUID_2);
-      break;
-
-    case FLUID_2:
-      if (waitDone(T_FLUID_2)) enterState(CHANGE_2_TO_3);
-      break;
-
-    case CHANGE_2_TO_3:
-      changeover(3, FLUID_3);
-      break;
-
-    case FLUID_3:
-      if (waitDone(T_FLUID_3)) enterState(COMPLETE);
-      break;
-
-    case COMPLETE:
-      allOutputsOff();
-      Serial.println("All outputs OFF");
-      enterState(IDLE);
+    case RUNNING:
+      runningState();
       break;
 
     case ERROR_STATE:
