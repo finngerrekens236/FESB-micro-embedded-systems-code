@@ -14,7 +14,7 @@ constexpr uint8_t PIN_DIGITALERROR = 22;
 constexpr unsigned long T_FLUID_1 = 10000;
 constexpr unsigned long T_FLUID_2 = 8000;
 constexpr unsigned long T_FLUID_3 = 15000;
-constexpr unsigned long VALVE_SWITCH_DELAY = 500;
+constexpr unsigned long SWITCH_DELAY = 3000;  /// every wait in a changeover
 
 enum State {
   IDLE,
@@ -119,18 +119,19 @@ bool startPressed() {
   return pressed;
 }
 
-// Pump OFF + close valve -> wait -> open next valve -> wait -> pump ON
-void changeover(int fluid, Phase next) {
-  bool v1 = (fluid == 1), v2 = (fluid == 2), v3 = (fluid == 3);
-
+// Pump OFF -> wait -> close valve -> wait -> open next valve -> wait -> pump ON
+void changeover(int from, int to, Phase next) {
   if (step == 0) {
-    allOutputsOff();
+    setOutputs(false, from == 1, from == 2, from == 3);  // pump OFF, valve still open
     nextStep();
-  } else if (step == 1 && waitDone(VALVE_SWITCH_DELAY)) {
-    setOutputs(false, v1, v2, v3);
+  } else if (step == 1 && waitDone(SWITCH_DELAY)) {
+    allOutputsOff();                                      // close current valve
     nextStep();
-  } else if (step == 2 && waitDone(VALVE_SWITCH_DELAY)) {
-    setOutputs(true, v1, v2, v3);
+  } else if (step == 2 && waitDone(SWITCH_DELAY)) {
+    setOutputs(false, to == 1, to == 2, to == 3);         // open next valve
+    nextStep();
+  } else if (step == 3 && waitDone(SWITCH_DELAY)) {
+    setOutputs(true, to == 1, to == 2, to == 3);          // pump ON
     enterPhase(next);
   }
 }
@@ -138,7 +139,14 @@ void changeover(int fluid, Phase next) {
 void runningState() {
   switch (phase) {
     case PREPARE_FLUID_1:
-      changeover(1, FLUID_1);
+      // Everything is already OFF: open V1 -> wait -> pump ON
+      if (step == 0) {
+        setOutputs(false, true, false, false);
+        nextStep();
+      } else if (waitDone(SWITCH_DELAY)) {
+        setOutputs(true, true, false, false);
+        enterPhase(FLUID_1);
+      }
       break;
 
     case FLUID_1:
@@ -146,7 +154,7 @@ void runningState() {
       break;
 
     case CHANGE_1_TO_2:
-      changeover(2, FLUID_2);
+      changeover(1, 2, FLUID_2);
       break;
 
     case FLUID_2:
@@ -154,7 +162,7 @@ void runningState() {
       break;
 
     case CHANGE_2_TO_3:
-      changeover(3, FLUID_3);
+      changeover(2, 3, FLUID_3);
       break;
 
     case FLUID_3:
