@@ -190,6 +190,8 @@ bool pumpOffThenClose(int valve) {
 void changeover(int from, int to, Phase next) {
   if (step <= 1) {
     if (pumpOffThenClose(from)) nextStep();
+  } else if (flowDetected()) {
+    raiseError("flow while pump OFF");                     // pump is OFF in steps 2-3
   } else if (step == 2 && waitDone(SWITCH_DELAY)) {
     setOutputs(false, to == 1, to == 2, to == 3);         // open next valve
     nextStep();
@@ -206,6 +208,8 @@ void runningState() {
       if (step == 0) {
         setOutputs(false, true, false, false);
         nextStep();
+      } else if (flowDetected()) {
+        raiseError("flow while pump OFF");
       } else if (waitDone(SWITCH_DELAY)) {
         setOutputs(true, true, false, false);
         enterPhase(FLUID_1);

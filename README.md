@@ -6,7 +6,8 @@ ESP32-based sequential three-fluid spray washing system.
 - `docs/ESP32WaterPump.pdf` – original assignment PDF
 - `CLAUDE.md` – working rules for Claude (pull → change → push)
 
-Current milestone: **Milestone 1 – Wokwi control simulation**.
+Current milestone: **Milestone 2 – Wokwi fault simulation (FLOW input)**.
+Milestone 1 (control simulation) is done.
 
 ## Wokwi pin map
 
@@ -27,7 +28,14 @@ ERROR and RESET use GPIO 23/4 instead of 21/22, so the default I2C pins stay fre
   Pump OFF → wait until flow stops (max `FLOW_STOP_TIMEOUT`, else ERROR "flow persists after pump OFF") → close valve → wait → open next valve → wait → Pump ON → wait for flow (max `FLOW_START_TIMEOUT`, else ERROR "no flow after pump ON") → fluid timer starts.
   The valve only closes once the pump has really stopped, and t1/t2/t3 count actual spraying time.
   Losing flow during a fluid phase also gives ERROR (dry running). COMPLETE uses the same pump-OFF → no-flow → close sequence.
+  Flow while the pump is OFF (valve waits in a changeover, PREPARE_FLUID_1, or IDLE after a 3 s grace period) also gives ERROR.
 - **`SWITCH_DELAY` = 3000 ms instead of 500 ms**, so every changeover step is clearly visible in the Wokwi simulation.
   Final values follow from the hydraulic prototype (assignment §7).
 - **Three top-level states (IDLE, RUNNING, ERROR):** the sequence states from §5.3 (PREPARE_FLUID_1 … FLUID_3, COMPLETE) are phases inside RUNNING.
   The Serial log still prints them as `STATE: FLUID_1` etc., matching §5.6.
+
+## Open points for later stages
+
+- **Siphoning (Stage 4, hydraulic prototype):** if a tank sits higher than the nozzle, liquid can keep flowing after Pump OFF by siphon action.
+  The flow sensor then reports real flow and the controller raises a false "flow persists after pump OFF" (or "flow while pump OFF") ERROR.
+  Check tank vs. nozzle height and the flow run-down time in Stage 4; possible fixes: closing the valve first, an anti-siphon valve, or a longer `FLOW_STOP_TIMEOUT`.
