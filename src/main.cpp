@@ -77,7 +77,7 @@ void setOutputs(bool pump, bool v1, bool v2, bool v3) {
   digitalWrite(PIN_V3, v3);
   if (pump) digitalWrite(PIN_PUMP, HIGH);
 
-  Serial.printf("Pump: %s | V1: %s | V2: %s | V3: %s\n",
+  Serial.printf("Pump: %s | V1: %s | V2: %s | V3: %s\r\n",
                 pump ? "ON" : "OFF", v1 ? "ON" : "OFF",
                 v2 ? "ON" : "OFF", v3 ? "ON" : "OFF");
 }
