@@ -16,9 +16,9 @@ Current milestone: **Milestone 1 – Wokwi control simulation**.
 | Pump (LED) | 33 |
 | START / STOP | 18 / 19 |
 | DIGITAL ERROR (test input) | 23 |
-| RESET (leaves ERROR) | 17 |
+| RESET (leaves ERROR) | 4 |
 
-ERROR and RESET use GPIO 23/17 instead of 21/22, so the default I2C pins stay free for displays/sensors in later stages.
+ERROR and RESET use GPIO 23/4 instead of 21/22, so the default I2C pins stay free for displays/sensors in later stages.
 
 ## Deliberate deviations from the assignment
 

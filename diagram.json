@@ -42,7 +42,7 @@
     [ "esp:23", "btn_error:1.l", "orange", [ "h19.6", "v-58.4" ] ],
     [ "esp:19", "btn_stop:1.l", "red", [ "h34.4", "v-26" ] ],
     [ "esp:18", "btn_start:1.l", "green", [ "h34.4", "v24.4" ] ],
-    [ "esp:17", "btn_reset:1.l", "violet", [ "h19.6", "v65.2" ] ],
+    [ "esp:4", "btn_reset:1.l", "violet", [ "h19.6", "v46" ] ],
 
     [ "btn_error:2.r", "esp:GND.2", "black", [ "h19.2", "v-44", "h-176", "v73.8" ] ],
     [ "btn_error:2.r", "btn_stop:2.r", "black", [ "h19.2", "v90", "h-19.2" ] ],

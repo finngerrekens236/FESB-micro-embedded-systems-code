@@ -7,7 +7,7 @@ constexpr uint8_t PIN_V3    = 27;
 constexpr uint8_t PIN_PUMP  = 33;
 constexpr uint8_t PIN_START = 18;
 constexpr uint8_t PIN_STOP  = 19;
-constexpr uint8_t PIN_RESET = 17;         // not 21/22: keep I2C free for later stages
+constexpr uint8_t PIN_RESET = 4;          // not 21/22: keep I2C free for later stages
 constexpr uint8_t PIN_DIGITALERROR = 23;
 
 // Timing in ms (docs/ASSIGNMENT.md 5.2)
