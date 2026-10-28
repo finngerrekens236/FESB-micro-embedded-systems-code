@@ -7,8 +7,8 @@ constexpr uint8_t PIN_V3    = 27;
 constexpr uint8_t PIN_PUMP  = 33;
 constexpr uint8_t PIN_START = 18;
 constexpr uint8_t PIN_STOP  = 19;
-constexpr uint8_t PIN_RESET = 21;
-constexpr uint8_t PIN_DIGITALERROR = 22;
+constexpr uint8_t PIN_RESET = 17;         // not 21/22: keep I2C free for later stages
+constexpr uint8_t PIN_DIGITALERROR = 23;
 
 // Timing in ms (docs/ASSIGNMENT.md 5.2)
 constexpr unsigned long T_FLUID_1 = 10000;
@@ -90,6 +90,7 @@ void enterState(State s) {
   state = s;
   step = 0;
   startTime = millis();
+  if (s == RUNNING) return;  // the phases print their own "STATE:" line
   Serial.print("STATE: ");
   Serial.println(stateName(s));
 }
@@ -98,7 +99,7 @@ void enterPhase(Phase p) {
   phase = p;
   step = 0;
   startTime = millis();
-  Serial.print("PHASE: ");
+  Serial.print("STATE: ");
   Serial.println(phaseName(p));
 }
 
@@ -167,6 +168,7 @@ void runningState() {
 
     case FLUID_3:
       if (waitDone(T_FLUID_3)) {  // run complete
+        Serial.println("STATE: COMPLETE");
         allOutputsOff();
         Serial.println("All outputs OFF");
         enterState(IDLE);
@@ -199,7 +201,7 @@ void stateMachine() {
 
   switch (state) {
     case IDLE:
-      if (start) {
+      if (start && digitalRead(PIN_STOP) == HIGH) {  // ignore START while STOP is held
         Serial.println("START received");
         enterState(RUNNING);
         enterPhase(PREPARE_FLUID_1);
@@ -221,10 +223,9 @@ void stateMachine() {
 }
 
 void setup() {
-  // Drive outputs LOW before enabling them, so nothing glitches ON at reset
   for (uint8_t pin : {PIN_PUMP, PIN_V1, PIN_V2, PIN_V3}) {
-    digitalWrite(pin, LOW);
     pinMode(pin, OUTPUT);
+    digitalWrite(pin, LOW);
   }
   pinMode(PIN_START, INPUT_PULLUP);
   pinMode(PIN_STOP, INPUT_PULLUP);

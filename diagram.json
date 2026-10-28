@@ -16,9 +16,9 @@
     { "type": "wokwi-led", "id": "led_v3", "top": 158, "left": -140, "attrs": { "color": "green", "label": "V3" } },
 
     { "type": "wokwi-pushbutton", "id": "btn_error", "top": -3, "left": 200, "attrs": { "color": "yellow", "label": "DIGITAL ERROR" } },
-    { "type": "wokwi-pushbutton", "id": "btn_reset", "top": 57, "left": 200, "attrs": { "color": "blue", "label": "RESET" } },
-    { "type": "wokwi-pushbutton", "id": "btn_stop", "top": 117, "left": 200, "attrs": { "color": "red", "label": "STOP" } },
-    { "type": "wokwi-pushbutton", "id": "btn_start", "top": 177, "left": 200, "attrs": { "color": "green", "label": "START" } }
+    { "type": "wokwi-pushbutton", "id": "btn_stop", "top": 57, "left": 200, "attrs": { "color": "red", "label": "STOP" } },
+    { "type": "wokwi-pushbutton", "id": "btn_start", "top": 117, "left": 200, "attrs": { "color": "green", "label": "START" } },
+    { "type": "wokwi-pushbutton", "id": "btn_reset", "top": 177, "left": 200, "attrs": { "color": "blue", "label": "RESET" } }
   ],
   "connections": [
     [ "esp:TX", "$serialMonitor:RX", "", [] ],
@@ -39,15 +39,15 @@
     [ "led_v2:C", "led_v3:C", "black", [ "h-20", "v60", "h20" ] ],
     [ "led_v3:C", "esp:GND.1", "black", [ "v24", "h120", "v-70.4" ] ],
 
-    [ "esp:22", "btn_error:1.l", "orange", [ "h19.6", "v-38" ] ],
-    [ "esp:21", "btn_reset:1.l", "violet", [ "h34.4", "v-6.8" ] ],
-    [ "esp:19", "btn_stop:1.l", "red", [ "h34.4", "v34" ] ],
-    [ "esp:18", "btn_start:1.l", "green", [ "h19.6", "v84.4" ] ],
+    [ "esp:23", "btn_error:1.l", "orange", [ "h19.6", "v-28.4" ] ],
+    [ "esp:19", "btn_stop:1.l", "red", [ "h34.4", "v-26" ] ],
+    [ "esp:18", "btn_start:1.l", "green", [ "h34.4", "v24.4" ] ],
+    [ "esp:17", "btn_reset:1.l", "violet", [ "h19.6", "v65.2" ] ],
 
     [ "btn_error:2.r", "esp:GND.2", "black", [ "h19.2", "v-44", "h-176", "v44" ] ],
-    [ "btn_error:2.r", "btn_reset:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ],
-    [ "btn_reset:2.r", "btn_stop:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ],
-    [ "btn_stop:2.r", "btn_start:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ]
+    [ "btn_error:2.r", "btn_stop:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ],
+    [ "btn_stop:2.r", "btn_start:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ],
+    [ "btn_start:2.r", "btn_reset:2.r", "black", [ "h19.2", "v60", "h-19.2" ] ]
   ],
   "dependencies": {}
 }
