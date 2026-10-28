@@ -9,12 +9,17 @@ constexpr uint8_t PIN_START = 18;
 constexpr uint8_t PIN_STOP  = 19;
 constexpr uint8_t PIN_RESET = 4;          // not 21/22: keep I2C free for later stages
 constexpr uint8_t PIN_DIGITALERROR = 23;
+constexpr uint8_t PIN_FLOW  = 13;         // simulated flow sensor: LOW = flow
 
 // Timing in ms (docs/ASSIGNMENT.md 5.2)
 constexpr unsigned long T_FLUID_1 = 10000;
 constexpr unsigned long T_FLUID_2 = 8000;
 constexpr unsigned long T_FLUID_3 = 15000;
-constexpr unsigned long SWITCH_DELAY = 3000;  /// every wait in a changeover
+constexpr unsigned long SWITCH_DELAY = 3000;  /// valve wait in a changeover
+
+// Flow supervision (docs/ASSIGNMENT.md 6)
+constexpr unsigned long FLOW_START_TIMEOUT = 3000;  /// max wait for flow after pump ON
+constexpr unsigned long FLOW_STOP_TIMEOUT  = 3000;  /// max wait for flow to stop after pump OFF
 
 enum State {
   IDLE,
@@ -29,7 +34,8 @@ enum Phase {
   CHANGE_1_TO_2,
   FLUID_2,
   CHANGE_2_TO_3,
-  FLUID_3
+  FLUID_3,
+  COMPLETE
 };
 
 // Global variables
@@ -57,6 +63,7 @@ const char* phaseName(Phase p) {
     case FLUID_2:         return "FLUID_2";
     case CHANGE_2_TO_3:   return "CHANGE_2_TO_3";
     case FLUID_3:         return "FLUID_3";
+    case COMPLETE:        return "COMPLETE";
   }
   return "?";
 }
@@ -120,14 +127,54 @@ bool startPressed() {
   return pressed;
 }
 
-// Pump OFF -> wait -> close valve -> wait -> open next valve -> wait -> pump ON
-void changeover(int from, int to, Phase next) {
+bool flowDetected() {
+  return digitalRead(PIN_FLOW) == LOW;
+}
+
+// Latches a fault; stateMachine() switches everything OFF and enters ERROR
+void raiseError(const char* reason) {
+  Serial.print("ERROR: ");
+  Serial.println(reason);
+  errorFlag = true;
+}
+
+// Pump is ON: wait for flow, then run the fluid timer while flow stays present
+void fluidPhase(unsigned long duration, Phase next) {
   if (step == 0) {
-    setOutputs(false, from == 1, from == 2, from == 3);  // pump OFF, valve still open
+    if (flowDetected()) {
+      Serial.println("Flow detected");
+      nextStep();  // fluid timer starts now
+    } else if (waitDone(FLOW_START_TIMEOUT)) {
+      raiseError("no flow after pump ON");
+    }
+  } else if (!flowDetected()) {
+    raiseError("flow lost during fluid phase");
+  } else if (waitDone(duration)) {
+    enterPhase(next);
+  }
+}
+
+// Steps 0-1: pump OFF -> wait until flow stops -> close valve.
+// Returns true on the loop the valve is closed.
+bool pumpOffThenClose(int valve) {
+  if (step == 0) {
+    setOutputs(false, valve == 1, valve == 2, valve == 3);  // pump OFF, valve still open
     nextStep();
-  } else if (step == 1 && waitDone(SWITCH_DELAY)) {
-    allOutputsOff();                                      // close current valve
-    nextStep();
+  } else if (step == 1) {
+    if (!flowDetected()) {
+      Serial.println("Flow stopped");
+      allOutputsOff();                                       // close valve
+      return true;
+    }
+    if (waitDone(FLOW_STOP_TIMEOUT)) raiseError("flow persists after pump OFF");
+  }
+  return false;
+}
+
+// Pump OFF -> wait for no flow -> close valve -> wait -> open next valve -> wait -> pump ON
+void changeover(int from, int to, Phase next) {
+  if (step <= 1) {
+    if (pumpOffThenClose(from)) nextStep();
   } else if (step == 2 && waitDone(SWITCH_DELAY)) {
     setOutputs(false, to == 1, to == 2, to == 3);         // open next valve
     nextStep();
@@ -151,7 +198,7 @@ void runningState() {
       break;
 
     case FLUID_1:
-      if (waitDone(T_FLUID_1)) enterPhase(CHANGE_1_TO_2);
+      fluidPhase(T_FLUID_1, CHANGE_1_TO_2);
       break;
 
     case CHANGE_1_TO_2:
@@ -159,7 +206,7 @@ void runningState() {
       break;
 
     case FLUID_2:
-      if (waitDone(T_FLUID_2)) enterPhase(CHANGE_2_TO_3);
+      fluidPhase(T_FLUID_2, CHANGE_2_TO_3);
       break;
 
     case CHANGE_2_TO_3:
@@ -167,9 +214,11 @@ void runningState() {
       break;
 
     case FLUID_3:
-      if (waitDone(T_FLUID_3)) {  // run complete
-        Serial.println("STATE: COMPLETE");
-        allOutputsOff();
+      fluidPhase(T_FLUID_3, COMPLETE);
+      break;
+
+    case COMPLETE:
+      if (pumpOffThenClose(3)) {
         Serial.println("All outputs OFF");
         enterState(IDLE);
       }
@@ -231,6 +280,7 @@ void setup() {
   pinMode(PIN_STOP, INPUT_PULLUP);
   pinMode(PIN_RESET, INPUT_PULLUP);
   pinMode(PIN_DIGITALERROR, INPUT_PULLUP);
+  pinMode(PIN_FLOW, INPUT_PULLUP);
 
   Serial.begin(115200);
   allOutputsOff();

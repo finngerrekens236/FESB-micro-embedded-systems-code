@@ -15,6 +15,8 @@
     { "type": "wokwi-led", "id": "led_v2", "top": 98, "left": -140, "attrs": { "color": "yellow", "label": "V2" } },
     { "type": "wokwi-led", "id": "led_v3", "top": 158, "left": -140, "attrs": { "color": "green", "label": "V3" } },
 
+    { "type": "wokwi-slide-switch", "id": "sw_flow", "top": 240, "left": 20, "attrs": {} },
+
     { "type": "wokwi-pushbutton", "id": "btn_error", "top": -33, "left": 200, "attrs": { "color": "yellow", "label": "DIGITAL ERROR" } },
     { "type": "wokwi-pushbutton", "id": "btn_stop", "top": 57, "left": 200, "attrs": { "color": "red", "label": "STOP" } },
     { "type": "wokwi-pushbutton", "id": "btn_start", "top": 117, "left": 200, "attrs": { "color": "green", "label": "START" } },
@@ -38,6 +40,9 @@
     [ "led_v1:C", "led_v2:C", "black", [ "h-20", "v60", "h20" ] ],
     [ "led_v2:C", "led_v3:C", "black", [ "h-20", "v60", "h20" ] ],
     [ "led_v3:C", "esp:GND.1", "black", [ "v24", "h120", "v-70.4" ] ],
+
+    [ "esp:13", "sw_flow:2", "cyan", [ "h-4.8", "v130", "h36.2" ] ],
+    [ "sw_flow:3", "led_v3:C", "black", [ "v26", "h-170.5", "v-74" ] ],
 
     [ "esp:23", "btn_error:1.l", "orange", [ "h19.6", "v-58.4" ] ],
     [ "esp:19", "btn_stop:1.l", "red", [ "h34.4", "v-26" ] ],
